@@ -130,7 +130,7 @@ Executor with 1 handle. Subscription delivers into pre-allocated `target_cmd` st
 In the infinite loop (`freertos.c:271-437`):
 
 - `rclc_executor_spin_some(&executor, 0)` — non-blocking spin every iteration. Returns immediately if no new subscribed messages. When a `/control/command` arrives, dispatches `control_cmd_callback`.
-- `rmw_uros_sync_session(10)` — every ~10 s, re-syncs the clock. Quick (10 ms timeout).
+- `rmw_uros_sync_session(10)` — every ~1 s (1000 loop iterations), re-syncs the clock. Quick (10 ms timeout).
 - `rcl_publish(&imu_publisher, &imu_msg, NULL)` — every time `data_valid` is set.
 
 ## Why these specific knobs
@@ -181,7 +181,7 @@ The 1-second delay before reset gives the agent time to log the error.
 This reset-on-failure pattern is **not applied to**:
 
 - The `rmw_uros_ping_agent` loop (deliberate: agent may not be up yet).
-- The `rmw_uros_sync_session` call (returns void; can't check).
+- The `rmw_uros_sync_session` calls. The function returns `rmw_ret_t` (`RMW_RET_ERROR` if no session is running or the sync fails), but `freertos.c:156` and `freertos.c:283` discard it. A failed sync leaves the previous clock offset in place.
 - `rcl_publish` failures in the main loop (deliberate: occasional failures are normal; we don't reset on every dropped publish).
 
 ## micro-ROS static library

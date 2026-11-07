@@ -37,7 +37,7 @@ flowchart LR
         BOOT[Boot:<br/>BNO085 + transport + allocator + entities + calibration]
         BOOT --> LOOP["Infinite loop (1 kHz cadence)"]
         LOOP --> SP[rclc_executor_spin_some]
-        SP --> SY[sync session every 10 s]
+        SP --> SY[sync session every ~1 s]
         SY --> EXT[Read INTN gate<br/>+ BNO085_GetData]
         EXT --> AUR[Auto-recovery on 50 errors]
         AUR --> PUB[data_valid → publish<br/>(quat normalise + Hamilton baseline)]
@@ -86,7 +86,7 @@ The CMSIS-RTOS2 wrapper enables them all (per `FreeRTOSConfig.h:96-102`) but the
 | Block | Typical wall-clock | Notes |
 |---|---|---|
 | `rclc_executor_spin_some(executor, 0)` | <100 µs when no callback; up to 5 ms when `control_cmd_callback` fires | callback writes `target_cmd` |
-| `rmw_uros_sync_session(10)` | only every 1000 ticks (~10 s) → ~10 ms once per 10 s | clock discipline |
+| `rmw_uros_sync_session(10)` | only every 1000 iterations (~1 s) → up to ~10 ms once per ~1 s | clock discipline |
 | INTN gate + `BNO085_GetData` | 0 (gate false) → ~5 ms (I²C read 30 bytes at 400 kHz) | flow-controlled by sensor rate |
 | Quaternion normalise + Hamilton + IMU msg build | ~100 µs (FPU hard) | every publish |
 | `rcl_publish` → XRCE serialize → blocking `HAL_UART_Transmit` | ~1-2 ms (80-120 byte XRCE message at 460800) | every publish |
@@ -122,7 +122,7 @@ The 220 ms worst case is the upper bound the **firmware deadman (500 ms)** is de
 | `osDelay(1)` sleeps | ~850 ms | task idle, idle task runs |
 | BNO085 read + publish | ~70-100 ms | 100 events × ~1 ms publish + occasional 5 ms I²C |
 | Executor spin (no callback) | ~10 ms | trivial polls |
-| Sync session (rare) | ~1 ms amortised | every 10 s |
+| Sync session | up to ~10 ms | every ~1 s (10 ms timeout) |
 | LED + actuation | ~1 ms | trivial |
 | Total CPU usage | **~10-12 %** | conservative estimate |
 

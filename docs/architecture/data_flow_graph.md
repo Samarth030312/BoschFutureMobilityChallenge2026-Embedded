@@ -92,7 +92,7 @@ flowchart TB
     CB -- "Yes" --> WCMD[Update target_cmd<br/>+ last_cmd_time_ns]
     CB -- "No" --> NEXT
     WCMD --> NEXT[sync_tick++]
-    NEXT --> SYNC{sync_tick >= 1000?<br/>(~10 s)}
+    NEXT --> SYNC{sync_tick >= 1000?<br/>(~1 s)}
     SYNC -- "Yes" --> DOSY[rmw_uros_sync_session(10)]
     SYNC -- "No" --> TIME
     DOSY --> TIME[time_ns = rmw_uros_epoch_nanos]

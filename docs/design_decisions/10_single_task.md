@@ -25,7 +25,7 @@ The task body (`freertos.c:103-437`) sequentially:
 10. Runs the 2-second BNO085 calibration.
 11. Enters the infinite loop:
     - `rclc_executor_spin_some(executor, 0)` — non-blocking executor poll.
-    - Every 10 s, re-sync session.
+    - Every ~1 s (1000 iterations), re-sync session.
     - INT-gate test (flag OR pin LOW) → BNO085_GetData.
     - 50-error auto-recovery.
     - `data_valid` → build IMU msg → publish.
