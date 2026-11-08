@@ -277,7 +277,7 @@ void StartDefaultTask(void *argument)
     /* Executor stays at fast cadence (~1 kHz) — IMU publish does NOT. */
     rclc_executor_spin_some(&executor, 0);
 
-    /* Continuous clock re-sync every ~10 s. */
+    /* Continuous clock re-sync every ~1 s (1000 loop iterations). */
     if (++sync_tick >= 1000u) {
       sync_tick = 0u;
       rmw_uros_sync_session(10);

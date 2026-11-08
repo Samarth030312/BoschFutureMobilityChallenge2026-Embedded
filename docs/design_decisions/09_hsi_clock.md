@@ -28,7 +28,7 @@ Reasons inferable from the code (NOT documented in source comments):
 The `system_state_machine` ladder + Jetson safety supervisor stale-window checks are computed in **the Jetson's clock domain** — not the firmware's. So firmware clock drift doesn't directly affect those gates. What it does affect:
 
 - UART baud-rate accuracy → potential framing errors → `HAL_UART_ErrorCallback` self-healing.
-- `rmw_uros_sync_session` periodicity (10 s nominal) → drift between sync events; corrected on each sync.
+- `rmw_uros_sync_session` periodicity (~1 s nominal) → drift between sync events; corrected on each sync.
 - PWM frequency (50 Hz nominal) → may be 49.5 or 50.5 Hz — well within ESC/servo tolerance.
 
 ## Alternatives the choice rules out

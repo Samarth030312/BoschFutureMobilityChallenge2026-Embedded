@@ -393,7 +393,7 @@ This document is the canonical reference for every numerical magic value in the 
 
 | File:line | `freertos.c:156` (initial), `freertos.c:283` (periodic) |
 |---|---|
-| Meaning | Initial sync has 1000 ms slack; periodic re-sync (every ~10 s, see Section 8) uses 10 ms. |
+| Meaning | Initial sync has 1000 ms slack; periodic re-sync (every ~1 s, see Section 8) uses 10 ms. |
 | Reason | Initial sync waits for the agent to fully establish; periodic re-sync is quick. |
 
 ### Domain ID = 42
@@ -537,12 +537,12 @@ This document is the canonical reference for every numerical magic value in the 
 | Reason | Matches `configTICK_RATE_HZ = 1000`. Polls 10× per BNO085 packet interval. |
 | Consequences if changed | `osDelay(0)` → busy-spin. `osDelay(10)` → 10× coarser polling. |
 
-### Sync re-tick threshold = `1000` (~10 s)
+### Sync re-tick threshold = `1000` (~1 s)
 
 | File:line | `freertos.c:281` (`if (++sync_tick >= 1000u)`) |
 |---|---|
-| Meaning | At 1 kHz tick × 1000 ticks = 10 s, re-sync XRCE-DDS clock with agent. |
-| Reason | Drift-correction periodicity. 10 s is conservative; HSI drift over 10 s is sub-millisecond. |
+| Meaning | One loop iteration is at least one `osDelay(1)` tick (1 ms at `configTICK_RATE_HZ = 1000`), so 1000 iterations ≈ 1 s, slightly more on iterations that read and publish the IMU. Every ~1 s, re-sync XRCE-DDS clock with agent. |
+| Reason | Drift-correction periodicity. NOT PROVEN FROM CODE why 1000 was chosen. At the ±1 % HSI tolerance quoted in Section 1, the local clock can drift by up to ~10 ms between re-syncs at this period. |
 
 ### LED toggle threshold = `50` ticks (10 Hz blink)
 
